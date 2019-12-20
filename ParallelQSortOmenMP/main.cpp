@@ -4,6 +4,7 @@
 #include <iostream>
 #include <omp.h>
 #include <string>
+#include <random>
 
 #include "ArrayFunc.h"
 #include "MathFunc.h"
@@ -39,8 +40,51 @@ int SelectJ(int _ProcNum, int _i, int _j)
     return _j;
 }
 
+int getNormPivot(int j, int dataSize, int iterCount, int blockNum)
+{    
+    if (iterCount == 0)
+    {
+        return 0;
+    }
+
+    if (iterCount == 1)
+    {
+        int val = (dataSize / 4);
+        if (j < blockNum / 2)
+        {
+            return (-1) * val;
+        }
+        else
+        {
+            return val;
+        }
+    }
+
+    if (iterCount == 2)
+    {
+        int val = (dataSize / 8);
+        switch (j)
+        {
+        case 0:
+            return val - dataSize / 2;
+        case 2:
+            return val * 3 - dataSize / 2;
+        case 4:
+            return val;
+        case 6:
+            return val * 3;
+        default:
+            break;
+        }
+    }
+
+    return -1;
+}
+
 void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
 {
+    omp_set_num_threads(threadNum);
+
     //------------------------------------
     // Размер блока
     int blockSize = dataSize / blockNum;
@@ -69,8 +113,6 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
     // Параллельная сортировка данных на блоки
     for (int iterCount = 0; iterCount < iterNum; iterCount++)
     {
-        omp_set_num_threads(threadNum);
-
 #pragma omp parallel for //shared(size, ProcNum, Bloks, i)
         for (int threadCount = 0; threadCount < threadNum; threadCount++)
         {
@@ -79,17 +121,18 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
             int* temp = new int[dataSize + 1];
 
             //------------------------------------
-            // Выбор ведущего элемента
-            temp[0] = blocksArr[SelectMedium(threadNum, iterCount, threadCount)][1];
-
-            //------------------------------------
             // Определяет какое должно быть j(new) взависимости от iterCount и threadCount
             int j = SelectJ(threadNum, iterCount, threadCount);
             memcpy(&temp[1], &blocksArr[j][1], sizeof(int) * blocksArr[j][0]);
             int tempSize = 1 + blocksArr[j][0];
 
+            //------------------------------------
+            // Выбор ведущего элемента
+            temp[0] = getNormPivot(j, dataSize, iterCount, blockNum);
+            printLog("Pivot: " + std::to_string(temp[0]) + "\n");
+
             int index = j + MathFunc::Step2(MathFunc::logCalc(threadNum) - iterCount);
-            memcpy(&temp[tempSize], &blocksArr[j][1], sizeof(int) * blocksArr[index][0]);
+            memcpy(&temp[tempSize], &blocksArr[index][1], sizeof(int) * blocksArr[index][0]);
             tempSize += blocksArr[index][0];
 
             //------------------------------------
@@ -123,14 +166,12 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
         }
     }
 
-    omp_set_num_threads(threadNum);
 #pragma omp parallel for
     for (int blockCount = 0; blockCount < blockNum; blockCount++)
     {
         //------------------------------------
         // Сортировка элементов блоков
         const int arrStartIndex = 1;
-        std::cout << "Thread number: " << omp_get_thread_num() << "\n";
         std::qsort(&blocksArr[blockCount][arrStartIndex], blocksArr[blockCount][0], sizeof(int),
             [](const void* a, const void* b)
         {
@@ -177,14 +218,12 @@ int main()
     //------------------------------------
     // Задание массива
     int *arr = new int[arrSize];
-    //printLog("Arr: [ ");
+    std::random_device rd;
+    std::mt19937 mersenne(rd());
     for (int i = 0; i < arrSize; i++)
     {
-        arr[i] = rand() % arrSize - arrSize / 2;
-        //printLog(std::to_string((int)arr[i]) + " ");
-        
+        arr[i] = mersenne() % arrSize - arrSize / 2;
     }
-    //printLog("]\n");
 
     //------------------------------------
     // Вызов сортировки
