@@ -4,7 +4,7 @@
 
 int MathFunc::Step2(int step)
 {
-    return (int)pow(2, step);
+    return 1 << step;
 }
 
 int MathFunc::logCalc(int twoT)
