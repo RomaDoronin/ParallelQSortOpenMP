@@ -1,11 +1,6 @@
 // Roman Doronin © 2017-2019
 //
 
-// Лаба работает, но требует доработки
-// SelectJ - вроде не так как надо работает и нужно подругому выбирать ведущий элемент
-// Вообщем все это доработано в этой же лабе через tbb, найдешь в папке "2-я лабораторная работа". В ней уже есть ускорение.
-// Вот она уже доработана до конца, идеал считай:)
-
 #include <iostream>
 #include <omp.h>
 #include <string>
@@ -80,15 +75,15 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
         }
     }
 
-    for (int i = 0; i < blockNum; i++)
+    /*for (int i = 0; i < blockNum; i++)
     {
-        //printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
+        printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
         for (int j = 1; j < blockSize; j++)
         {
-            //printLog(std::to_string((int)blocksArr[i][j]) + " ");
+            printLog(std::to_string((int)blocksArr[i][j]) + " ");
         }
-        //printLog("]\n");
-    }
+        printLog("]\n");
+    }*/
 
     //------------------------------------
     // Параллельная сортировка данных на блоки
@@ -164,15 +159,15 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
         }
     }
 
-    for (int i = 0; i < blockNum; i++)
+    /*for (int i = 0; i < blockNum; i++)
     {
-        //printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
+        printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
         for (int j = 1; j < blocksArr[i][0]; j++)
         {
-            //printLog(std::to_string((int)blocksArr[i][j]) + " ");
+            printLog(std::to_string((int)blocksArr[i][j]) + " ");
         }
-        //printLog("]\n");
-    }
+        printLog("]\n");
+    }*/
 
 #pragma omp parallel for
     for (int blockCount = 0; blockCount < blockNum; blockCount++)
@@ -180,14 +175,21 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
         //------------------------------------
         // Сортировка элементов блоков
         const int arrStartIndex = 1;
-        QuickSort::SerialQuickSort(blocksArr[blockCount], arrStartIndex, blocksArr[blockCount][0]);
+        std::qsort(&blocksArr[blockCount][arrStartIndex], blocksArr[blockCount][0], sizeof(int),
+            [](const void* a, const void* b)
+        {
+            int arg1 = *static_cast<const int*>(a);
+            int arg2 = *static_cast<const int*>(b);
 
-        //printLog("Block[" + std::to_string(blockCount) + "]: [ " + std::to_string((int)blocksArr[blockCount][0]) + " ");
+            return (arg1 > arg2) - (arg1 < arg2);
+        });
+
+        /*printLog("Block[" + std::to_string(blockCount) + "]: [ " + std::to_string((int)blocksArr[blockCount][0]) + " ");
         for (int j = 1; j < blocksArr[blockCount][0]; j++)
         {
-            //printLog(std::to_string((int)blocksArr[blockCount][j]) + " ");
+            printLog(std::to_string((int)blocksArr[blockCount][j]) + " ");
         }
-        //printLog("]\n");
+        printLog("]\n");*/
 
         int pDataStartIndex = 0;
 
@@ -260,9 +262,9 @@ int main()
         std::cout << "Not correctly" << std::endl << std::endl;
     }
 
-    /*std::cout << std::endl;
+    std::cout << std::endl;
     int a;
-    std::cin >> a;*/
+    std::cin >> a;
 
     return 0;
 }
