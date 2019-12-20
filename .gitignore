@@ -1,0 +1,33 @@
+# VS/Rider/MD/Consulo
+/bin/
+/.vs/
+/.vscode/
+**/Release/
+/ipch/
+**/Debug/
+/.vs/
+/x64/
+
+ExportedObj/
+.consulo/
+.idea/
+
+*.vcxproj
+*.filters
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.db
+ 
+# Builds
+*.apk
+*.unitypackage
+*.app
+*.exe
