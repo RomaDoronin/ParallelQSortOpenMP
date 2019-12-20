@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-void QuickSort::SerialQuickSort(double* pData, int first, int last)
+void QuickSort::SerialQuickSort(int* pData, int first, int last)
 {
     if (first >= last)
     {

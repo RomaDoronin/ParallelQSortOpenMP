@@ -1,7 +1,7 @@
 #include "ArrayFunc.h"
 
 
-bool ArrayFunc::PRKK(double *arr, int arrSize)
+bool ArrayFunc::PRKK(int *arr, int arrSize)
 {
     for (int i = 0; i < arrSize - 1; i++)
     {
@@ -14,7 +14,7 @@ bool ArrayFunc::PRKK(double *arr, int arrSize)
     return true;
 }
 
-void ArrayFunc::ShiftMas(double *pData, int position, int shift, int c_size)
+void ArrayFunc::ShiftMas(int *pData, int position, int shift, int c_size)
 {
     if (shift >= 0)
     {

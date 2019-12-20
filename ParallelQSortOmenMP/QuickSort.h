@@ -2,6 +2,6 @@
 class QuickSort
 {
 public:
-    static void SerialQuickSort(double* pData, int first, int last);
+    static void SerialQuickSort(int* pData, int first, int last);
 };
 

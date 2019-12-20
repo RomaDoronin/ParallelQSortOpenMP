@@ -47,25 +47,25 @@ int SelectJ(int _ProcNum, int _i, int _j)
     }
 }
 
-void ParallelQuickSotr(double* pData, int dataSize, int threadNum, int blockNum)
+void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
 {
     //------------------------------------
     // Размер блока
     int blockSize = dataSize / blockNum;
     int iterNum = MathFunc::logCalc(blockNum);
 
-    printLog("Data size  : " + std::to_string(dataSize)  + "\n");
-    printLog("Thread num : " + std::to_string(threadNum) + "\n");
-    printLog("Block num  : " + std::to_string(blockNum)  + "\n");
-    printLog("Block size : " + std::to_string(blockSize) + "\n");
-    printLog("Iter num   : " + std::to_string(iterNum)   + "\n");
+    //printLog("Data size  : " + std::to_string(dataSize)  + "\n");
+    //printLog("Thread num : " + std::to_string(threadNum) + "\n");
+    //printLog("Block num  : " + std::to_string(blockNum)  + "\n");
+    //printLog("Block size : " + std::to_string(blockSize) + "\n");
+    //printLog("Iter num   : " + std::to_string(iterNum)   + "\n");
 
     //------------------------------------
     // Определение массива блоков
-    double **blocksArr = new double*[blockNum];
+    int **blocksArr = new int*[blockNum];
     for (int count = 0; count < blockNum; count++)
     {
-        blocksArr[count] = new double[dataSize + 1];
+        blocksArr[count] = new int[dataSize + 1];
     }
 
     //------------------------------------
@@ -82,12 +82,12 @@ void ParallelQuickSotr(double* pData, int dataSize, int threadNum, int blockNum)
 
     for (int i = 0; i < blockNum; i++)
     {
-        printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
+        //printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
         for (int j = 1; j < blockSize; j++)
         {
-            printLog(std::to_string((int)blocksArr[i][j]) + " ");
+            //printLog(std::to_string((int)blocksArr[i][j]) + " ");
         }
-        printLog("]\n");
+        //printLog("]\n");
     }
 
     //------------------------------------
@@ -101,14 +101,11 @@ void ParallelQuickSotr(double* pData, int dataSize, int threadNum, int blockNum)
         {
             //------------------------------------
             // Создание временного массива
-            double* temp = new double[dataSize + 1];
+            int* temp = new int[dataSize + 1];
 
             //------------------------------------
             // Выбор ведущего элемента
-            printLog("SelectMedium(" +
-                std::to_string(threadNum) + ", " +
-                std::to_string(iterCount) + ", " +
-                std::to_string(threadCount) + ")\n");
+            //printLog("SelectMedium(" + std::to_string(threadNum) + ", " + std::to_string(iterCount) + ", " + std::to_string(threadCount) + ")\n");
             temp[0] = blocksArr[SelectMedium(threadNum, iterCount, threadCount)][1];
 
             //------------------------------------
@@ -130,7 +127,7 @@ void ParallelQuickSotr(double* pData, int dataSize, int threadNum, int blockNum)
             //------------------------------------
             // Перекидывание элементов в зависимости от ведущего
             int PivotPos = 0;
-            double Pivot = temp[0];
+            int Pivot = temp[0];
             for (int t = 1; t < tempSize; t++)
             {
                 if (temp[t] <= Pivot)
@@ -169,12 +166,12 @@ void ParallelQuickSotr(double* pData, int dataSize, int threadNum, int blockNum)
 
     for (int i = 0; i < blockNum; i++)
     {
-        printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
+        //printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
         for (int j = 1; j < blocksArr[i][0]; j++)
         {
-            printLog(std::to_string((int)blocksArr[i][j]) + " ");
+            //printLog(std::to_string((int)blocksArr[i][j]) + " ");
         }
-        printLog("]\n");
+        //printLog("]\n");
     }
 
 #pragma omp parallel for
@@ -185,12 +182,12 @@ void ParallelQuickSotr(double* pData, int dataSize, int threadNum, int blockNum)
         const int arrStartIndex = 1;
         QuickSort::SerialQuickSort(blocksArr[blockCount], arrStartIndex, blocksArr[blockCount][0]);
 
-        printLog("Block[" + std::to_string(blockCount) + "]: [ " + std::to_string((int)blocksArr[blockCount][0]) + " ");
+        //printLog("Block[" + std::to_string(blockCount) + "]: [ " + std::to_string((int)blocksArr[blockCount][0]) + " ");
         for (int j = 1; j < blocksArr[blockCount][0]; j++)
         {
-            printLog(std::to_string((int)blocksArr[blockCount][j]) + " ");
+            //printLog(std::to_string((int)blocksArr[blockCount][j]) + " ");
         }
-        printLog("]\n");
+        //printLog("]\n");
 
         int pDataStartIndex = 0;
 
@@ -199,14 +196,14 @@ void ParallelQuickSotr(double* pData, int dataSize, int threadNum, int blockNum)
             pDataStartIndex += blocksArr[count][0];
         }
 
-        printLog("H = " + std::to_string(pDataStartIndex) + "\n");
+        //printLog("H = " + std::to_string(pDataStartIndex) + "\n");
 
         //------------------------------------
         // Занесение блоков в исходный массив
         for (int elemCount = 0; elemCount < blocksArr[blockCount][0]; elemCount++)
         {
             pData[pDataStartIndex] = blocksArr[blockCount][elemCount + 1];
-            printLog(">> pData[" + std::to_string(pDataStartIndex) + "]: " + std::to_string(pData[pDataStartIndex]) + "\n");
+            //printLog(">> pData[" + std::to_string(pDataStartIndex) + "]: " + std::to_string(pData[pDataStartIndex]) + "\n");
             pDataStartIndex++;
         }
     }
@@ -234,15 +231,15 @@ int main()
 
     //------------------------------------
     // Задание массива
-    double *arr = new double[arrSize];
-    printLog("Arr: [ ");
+    int *arr = new int[arrSize];
+    //printLog("Arr: [ ");
     for (int i = 0; i < arrSize; i++)
     {
         arr[i] = rand() % arrSize - arrSize / 2;
-        printLog(std::to_string((int)arr[i]) + " ");
+        //printLog(std::to_string((int)arr[i]) + " ");
         
     }
-    printLog("]\n");
+    //printLog("]\n");
 
     //------------------------------------
     // Вызов сортировки
@@ -263,9 +260,9 @@ int main()
         std::cout << "Not correctly" << std::endl << std::endl;
     }
 
-    std::cout << std::endl;
+    /*std::cout << std::endl;
     int a;
-    std::cin >> a;
+    std::cin >> a;*/
 
     return 0;
 }
