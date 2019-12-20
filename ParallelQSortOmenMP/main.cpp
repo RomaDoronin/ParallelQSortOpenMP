@@ -123,19 +123,21 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
         }
     }
 
+    omp_set_num_threads(threadNum);
 #pragma omp parallel for
     for (int blockCount = 0; blockCount < blockNum; blockCount++)
     {
         //------------------------------------
         // Сортировка элементов блоков
         const int arrStartIndex = 1;
+        std::cout << "Thread number: " << omp_get_thread_num() << "\n";
         std::qsort(&blocksArr[blockCount][arrStartIndex], blocksArr[blockCount][0], sizeof(int),
             [](const void* a, const void* b)
         {
             int arg1 = *static_cast<const int*>(a);
             int arg2 = *static_cast<const int*>(b);
 
-            return (arg1 > arg2) - (arg1 < arg2);
+            return arg1 - arg2;
         });
 
         int pDataStartIndex = 0;
@@ -203,9 +205,9 @@ int main()
         std::cout << "Not correctly" << std::endl << std::endl;
     }
 
-    /*std::cout << std::endl;
+    std::cout << std::endl;
     int a;
-    std::cin >> a;*/
+    std::cin >> a;
 
     return 0;
 }
