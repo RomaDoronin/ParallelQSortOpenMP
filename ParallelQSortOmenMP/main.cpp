@@ -49,15 +49,10 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
     int blockSize = dataSize / blockNum;
     int iterNum = MathFunc::logCalc(blockNum);
 
-    //printLog("Data size  : " + std::to_string(dataSize)  + "\n");
-    //printLog("Thread num : " + std::to_string(threadNum) + "\n");
-    //printLog("Block num  : " + std::to_string(blockNum)  + "\n");
-    //printLog("Block size : " + std::to_string(blockSize) + "\n");
-    //printLog("Iter num   : " + std::to_string(iterNum)   + "\n");
-
     //------------------------------------
     // Определение массива блоков
     int **blocksArr = new int*[blockNum];
+#pragma omp parallel for
     for (int count = 0; count < blockNum; count++)
     {
         blocksArr[count] = new int[dataSize + 1];
@@ -66,24 +61,12 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
     //------------------------------------
     // Пускай на 0-ом месте хранится размер блока
     // Инициализируем блоки данными
+#pragma omp parallel for
     for (int blockCount = 0; blockCount < blockNum; blockCount++)
     {
         blocksArr[blockCount][0] = blockSize;
-        for (int elemCount = 1; elemCount < blockSize + 1; elemCount++)
-        {
-            blocksArr[blockCount][elemCount] = pData[blockCount * blockSize + elemCount - 1];
-        }
+        memcpy(&pData[blockCount * blockSize], &blocksArr[blockCount][1], sizeof(int) * blockSize);
     }
-
-    /*for (int i = 0; i < blockNum; i++)
-    {
-        printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
-        for (int j = 1; j < blockSize; j++)
-        {
-            printLog(std::to_string((int)blocksArr[i][j]) + " ");
-        }
-        printLog("]\n");
-    }*/
 
     //------------------------------------
     // Параллельная сортировка данных на блоки
@@ -159,16 +142,6 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
         }
     }
 
-    /*for (int i = 0; i < blockNum; i++)
-    {
-        printLog("Block[" + std::to_string(i) + "]: [ " + std::to_string((int)blocksArr[i][0]) + " ");
-        for (int j = 1; j < blocksArr[i][0]; j++)
-        {
-            printLog(std::to_string((int)blocksArr[i][j]) + " ");
-        }
-        printLog("]\n");
-    }*/
-
 #pragma omp parallel for
     for (int blockCount = 0; blockCount < blockNum; blockCount++)
     {
@@ -210,6 +183,7 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
         }
     }
 
+#pragma omp parallel for
     for (int blockCount = 0; blockCount < blockNum; blockCount++)
     {
         delete[] blocksArr[blockCount];
@@ -224,7 +198,7 @@ int main()
 
     //------------------------------------
     // Начальные условия
-    int arrSize = 10000000;
+    int arrSize = 20000000;
     int threadNum = 4;
     int blockNum = threadNum * 2;
 
@@ -262,9 +236,9 @@ int main()
         std::cout << "Not correctly" << std::endl << std::endl;
     }
 
-    std::cout << std::endl;
+    /*std::cout << std::endl;
     int a;
-    std::cin >> a;
+    std::cin >> a;*/
 
     return 0;
 }
