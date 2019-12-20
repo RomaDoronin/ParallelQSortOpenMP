@@ -96,13 +96,13 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
             // Перекидывание элементов в зависимости от ведущего
             int PivotPos = 0;
             int Pivot = temp[0];
-            for (int t = 1; t < tempSize; t++)
+            for (int tempCount = 1; tempCount < tempSize; tempCount++)
             {
-                if (temp[t] <= Pivot)
+                if (temp[tempCount] <= Pivot)
                 {
-                    if (t != (PivotPos + 1))
+                    if (tempCount != (PivotPos + 1))
                     {
-                        std::swap(temp[t], temp[PivotPos + 1]);
+                        std::swap(temp[tempCount], temp[PivotPos + 1]);
                     }
                     PivotPos++;
                 }
@@ -110,23 +110,14 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
 
             //------------------------------------
             // Заносим первый массив
-            int tempCount = 1;
-            for (int k = 0; k < PivotPos; k++)
-            {
-                blocksArr[j][k + 1] = temp[tempCount];
-                tempCount++;
-            }
-
+            int tempCount = 1 + PivotPos;
             blocksArr[j][0] = PivotPos;
+            memcpy(&blocksArr[j][1], &temp[1], sizeof(int) * blocksArr[j][0]);
 
             //------------------------------------
             // Заносим второй массив
-            for (int k = 0; k < tempSize - (PivotPos + 1); k++)
-            {
-                blocksArr[j + MathFunc::Step2(MathFunc::logCalc(threadNum) - iterCount)][k + 1] = temp[tempCount];
-                tempCount++;
-            }
-            blocksArr[j + MathFunc::Step2(MathFunc::logCalc(threadNum) - iterCount)][0] = tempSize - (PivotPos + 1);
+            blocksArr[index][0] = tempSize - (PivotPos + 1);
+            memcpy(&blocksArr[index][1], &temp[tempCount], sizeof(int) * blocksArr[index][0]);
 
             delete[] temp;
         }
@@ -147,13 +138,6 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
             return (arg1 > arg2) - (arg1 < arg2);
         });
 
-        /*printLog("Block[" + std::to_string(blockCount) + "]: [ " + std::to_string((int)blocksArr[blockCount][0]) + " ");
-        for (int j = 1; j < blocksArr[blockCount][0]; j++)
-        {
-            printLog(std::to_string((int)blocksArr[blockCount][j]) + " ");
-        }
-        printLog("]\n");*/
-
         int pDataStartIndex = 0;
 
         for (int count = 0; count < blockCount; count++)
@@ -161,16 +145,9 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
             pDataStartIndex += blocksArr[count][0];
         }
 
-        //printLog("H = " + std::to_string(pDataStartIndex) + "\n");
-
         //------------------------------------
         // Занесение блоков в исходный массив
-        for (int elemCount = 0; elemCount < blocksArr[blockCount][0]; elemCount++)
-        {
-            pData[pDataStartIndex] = blocksArr[blockCount][elemCount + 1];
-            //printLog(">> pData[" + std::to_string(pDataStartIndex) + "]: " + std::to_string(pData[pDataStartIndex]) + "\n");
-            pDataStartIndex++;
-        }
+        memcpy(&pData[pDataStartIndex], &blocksArr[blockCount][1], sizeof(int) * blocksArr[blockCount][0]);
     }
 
 #pragma omp parallel for
@@ -226,9 +203,9 @@ int main()
         std::cout << "Not correctly" << std::endl << std::endl;
     }
 
-    std::cout << std::endl;
+    /*std::cout << std::endl;
     int a;
-    std::cin >> a;
+    std::cin >> a;*/
 
     return 0;
 }
