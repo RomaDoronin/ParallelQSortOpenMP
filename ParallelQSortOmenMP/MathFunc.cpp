@@ -7,7 +7,15 @@ int MathFunc::Step2(int step)
     return 1 << step;
 }
 
-int MathFunc::logCalc(int twoT)
+int MathFunc::logCalc(int val)
 {
-    return (int)log2(twoT);
+    int count = -1;
+
+    while (val)
+    {
+        val >>= 1;
+        count++;
+    }
+
+    return count;
 }
