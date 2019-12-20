@@ -7,7 +7,6 @@
 
 #include "ArrayFunc.h"
 #include "MathFunc.h"
-#include "QuickSort.h"
 
 
 void printLog(std::string log)
@@ -21,25 +20,23 @@ void printLog(std::string log)
 // threadNum, iterCount, threadCount
 int SelectMedium(int threadNum, int iterCount, int threadCount)
 {
-    if (iterCount == 0)
-    {
-        return 0;
-    }
-    else
+    if (iterCount)
     {
         return (threadCount - threadCount % (threadNum / MathFunc::Step2(iterCount - 1)));
     }
+
+    return 0;
 }
 
 // Функция для выбора пар смежных элементов
 int SelectJ(int _ProcNum, int _i, int _j)
 {
-    if (_i == 0)
-        return _j;
-    else
+    if (_i)
     {
         return _j + (_j / (_ProcNum / MathFunc::Step2(_i))) * (_ProcNum / MathFunc::Step2(_i));
     }
+
+    return _j;
 }
 
 void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
@@ -65,7 +62,7 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
     for (int blockCount = 0; blockCount < blockNum; blockCount++)
     {
         blocksArr[blockCount][0] = blockSize;
-        memcpy(&pData[blockCount * blockSize], &blocksArr[blockCount][1], sizeof(int) * blockSize);
+        memcpy(&blocksArr[blockCount][1], &pData[blockCount * blockSize], sizeof(int) * blockSize);
     }
 
     //------------------------------------
@@ -83,24 +80,17 @@ void ParallelQuickSotr(int* pData, int dataSize, int threadNum, int blockNum)
 
             //------------------------------------
             // Выбор ведущего элемента
-            //printLog("SelectMedium(" + std::to_string(threadNum) + ", " + std::to_string(iterCount) + ", " + std::to_string(threadCount) + ")\n");
             temp[0] = blocksArr[SelectMedium(threadNum, iterCount, threadCount)][1];
 
             //------------------------------------
             // Определяет какое должно быть j(new) взависимости от iterCount и threadCount
             int j = SelectJ(threadNum, iterCount, threadCount);
+            memcpy(&temp[1], &blocksArr[j][1], sizeof(int) * blocksArr[j][0]);
+            int tempSize = 1 + blocksArr[j][0];
 
-            int tempSize = 1;
-            for (int k = 1; k < blocksArr[j][0] + 1; k++)
-            {
-                temp[tempSize] = blocksArr[j][k];
-                tempSize++;
-            }
-            for (int k = 1; k < blocksArr[j + MathFunc::Step2(MathFunc::logCalc(threadNum) - iterCount)][0] + 1; k++)
-            {
-                temp[tempSize] = blocksArr[j + MathFunc::Step2(MathFunc::logCalc(threadNum) - iterCount)][k];
-                tempSize++;
-            }
+            int index = j + MathFunc::Step2(MathFunc::logCalc(threadNum) - iterCount);
+            memcpy(&temp[tempSize], &blocksArr[j][1], sizeof(int) * blocksArr[index][0]);
+            tempSize += blocksArr[index][0];
 
             //------------------------------------
             // Перекидывание элементов в зависимости от ведущего
@@ -198,7 +188,7 @@ int main()
 
     //------------------------------------
     // Начальные условия
-    int arrSize = 20000000;
+    int arrSize = 10000000;
     int threadNum = 4;
     int blockNum = threadNum * 2;
 
@@ -236,9 +226,9 @@ int main()
         std::cout << "Not correctly" << std::endl << std::endl;
     }
 
-    /*std::cout << std::endl;
+    std::cout << std::endl;
     int a;
-    std::cin >> a;*/
+    std::cin >> a;
 
     return 0;
 }

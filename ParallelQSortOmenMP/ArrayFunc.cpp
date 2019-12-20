@@ -1,33 +1,32 @@
 #include "ArrayFunc.h"
+#include <iostream>
 
 
 bool ArrayFunc::PRKK(int *arr, int arrSize)
 {
+    int repeatCount = 0;
+    int MAX_REPEAT = 1000;
+
     for (int i = 0; i < arrSize - 1; i++)
     {
         if (arr[i] > arr[i + 1])
         {
             return false;
         }
+        else if (arr[i] == arr[i + 1])
+        {
+            repeatCount++;
+        }
+        else
+        {
+            repeatCount = 0;
+        }
+
+        if (repeatCount == MAX_REPEAT)
+        {
+            return false;
+        }
     }
 
     return true;
-}
-
-void ArrayFunc::ShiftMas(int *pData, int position, int shift, int c_size)
-{
-    if (shift >= 0)
-    {
-        for (int i = c_size + position - 1; i >= position; i--)
-        {
-            pData[i + shift] = pData[i];
-        }
-    }
-    else
-    {
-        for (int i = position; i <= c_size + position - 1; i++)
-        {
-            pData[i + shift] = pData[i];
-        }
-    }
 }
